@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#101820" />
+  <title>FIP Field</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="rail" aria-label="Main navigation">
+      <button class="nav active" data-page="dashboard"><span>⌂</span><small>Home</small></button>
+      <button class="nav" data-page="incident"><span>⚑</span><small>Incident</small></button>
+      <button class="nav" data-page="building"><span>▣</span><small>Building</small></button>
+      <button class="nav" data-page="utilities"><span>⚡</span><small>Utility</small></button>
+      <button class="nav" data-page="origin"><span>◎</span><small>Origin</small></button>
+      <button class="nav" data-page="witnesses"><span>☰</span><small>People</small></button>
+      <button class="nav" data-page="export"><span>⇩</span><small>Export</small></button>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Fire Investigation Platform</div>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <button id="saveBtn" class="pill">Saved</button>
+      </header>
+
+      <section id="dashboard" class="page active">
+        <div class="card hero">
+          <label>Case Number<input id="caseNumber" data-key="caseNumber" placeholder="FM260000000" /></label>
+          <label>Incident Address / Location<input data-key="incidentAddress" placeholder="Address or location" /></label>
+          <div class="grid2">
+            <label>Date Notified<input data-key="dateNotified" type="date" /></label>
+            <label>Time Notified<input data-key="timeNotified" type="time" /></label>
+          </div>
+        </div>
+        <div class="quick-grid">
+          <button class="quick" data-page="incident">Initial Info</button>
+          <button class="quick" data-page="building">Building</button>
+          <button class="quick" data-page="utilities">Utilities</button>
+          <button class="quick" data-page="origin">Origin/Cause</button>
+        </div>
+      </section>
+
+      <section id="incident" class="page">
+        <div class="card">
+          <h2>Initial Information</h2>
+          <div class="grid2">
+            <label>FM Report Number<input data-key="fmReportNumber" /></label>
+            <label>Incident Type<select data-key="incidentType"><option></option><option>Structure</option><option>Vehicle/Machinery</option><option>Outside</option><option>Explosives</option></select></label>
+          </div>
+          <div class="seg" data-key="fireCause"><button>Accidental</button><button>Undetermined</button><button>Incendiary</button><button>Natural</button></div>
+          <h3>Authority</h3>
+          <div class="seg" data-key="authority"><button>Exigency</button><button>Search Warrant</button><button>Consent</button></div>
+          <label>Consent Name<input data-key="consentName" /></label>
+          <h3>911 Caller</h3>
+          <div class="grid2"><label>Name<input data-key="callerName" /></label><label>Phone<input data-key="callerPhone" inputmode="tel" /></label></div>
+          <label>Address<input data-key="callerAddress" /></label>
+          <h3>Other LEO on Scene</h3>
+          <div class="checks"><label><input type="checkbox" data-key="leoLCSO"> LCSO</label><label><input type="checkbox" data-key="leoPurcellville"> Purcellville PD</label><label><input type="checkbox" data-key="leoMiddleburg"> Middleburg PD</label><label><input type="checkbox" data-key="leoLeesburg"> Leesburg PD</label><label><input type="checkbox" data-key="leoOther"> Other</label></div>
+        </div>
+        <div class="card"><h2>Fire Suppression</h2><div class="grid2"><label>Incident Commander<input data-key="incidentCommander" /></label><label>IC Unit ID<input data-key="icUnit" /></label><label>Number of Alarms<input data-key="alarms" inputmode="numeric" /></label><label>1st Arriving Engine<input data-key="firstEngine" /></label></div><label>Activity on Arrival<textarea data-key="arrivalActivity"></textarea></label></div>
+      </section>
+
+      <section id="building" class="page"><div class="card"><h2>Building Information</h2><div class="grid2"><label>Year Built<input data-key="yearBuilt" inputmode="numeric" /></label><label>Stories<input data-key="stories" /></label><label>Length<input data-key="length" /></label><label>Width<input data-key="width" /></label></div><div class="seg" data-key="propertyStatus"><button>Owner Occupied</button><button>Rented</button><button>Vacant</button><button>For Sale</button></div><div class="checks"><label><input type="checkbox" data-key="underConstruction"> Under Construction / Remodel</label><label><input type="checkbox" data-key="perimeterFence"> Perimeter Fence</label><label><input type="checkbox" data-key="solarPanels"> Solar Panels</label></div><h3>Life Safety / Alarms / Security</h3><div class="checks"><label><input type="checkbox" data-key="smokeAlarms"> Smoke Alarms</label><label><input type="checkbox" data-key="smokeAlerted"> Alerted Occupants</label><label><input type="checkbox" data-key="hardwired"> Hardwired</label><label><input type="checkbox" data-key="batteryOperated"> Battery Operated</label><label><input type="checkbox" data-key="coDetectors"> CO Detectors</label><label><input type="checkbox" data-key="fireAlarmSystem"> Fire Alarm System</label><label><input type="checkbox" data-key="alarmActivated"> Did Alarm</label><label><input type="checkbox" data-key="sprinklers"> Fire Sprinklers</label><label><input type="checkbox" data-key="sprinklersFunctioned"> Sprinklers Functioned</label><label><input type="checkbox" data-key="securityCameras"> Security Cameras</label></div><label>Notes<textarea data-key="buildingNotes"></textarea></label></div></section>
+
+      <section id="utilities" class="page"><div class="card"><h2>Utilities</h2><h3>Electric</h3><div class="seg" data-key="electricStatus"><button>On</button><button>Off</button><button>None</button></div><label>Provider<select data-key="electricProvider"><option></option><option>Dominion Power</option><option>NOVEC</option><option>Virginia Power</option><option>Other</option></select></label><div class="seg" data-key="electricServiceType"><button>Service Lateral</button><button>Overhead</button></div><label>Meter Location<input data-key="electricMeterLocation" /></label><h3>Gas / Fuel</h3><div class="seg" data-key="gasStatus"><button>On</button><button>Off</button><button>None</button></div><div class="seg" data-key="fuelType"><button>Natural Gas</button><button>Propane</button><button>Oil</button></div><label>Notes<textarea data-key="utilityNotes"></textarea></label></div></section>
+
+      <section id="origin" class="page"><div class="card"><h2>Origin and Cause</h2><label>Area / Room of Origin<input data-key="areaOfOrigin" /></label><label>First Fuel Ignited<input data-key="firstFuel" /></label><label>Ignition Source<input data-key="ignitionSource" /></label><label>Cause Narrative<textarea data-key="causeNarrative"></textarea></label><div class="seg" data-key="finalCause"><button>Accidental</button><button>Undetermined</button><button>Incendiary</button><button>Natural</button></div></div></section>
+
+      <section id="witnesses" class="page"><div class="card"><h2>People / Witness Notes</h2><label>Property Owner<input data-key="ownerName" /></label><label>Owner Phone<input data-key="ownerPhone" inputmode="tel" /></label><label>Discoverer / First Witness<input data-key="discovererName" /></label><label>Witness Notes<textarea data-key="witnessNotes"></textarea></label></div></section>
+
+      <section id="export" class="page"><div class="card"><h2>Export / Import</h2><p class="muted">Export creates an editable .fip case file. It is JSON with a custom extension.</p><div class="actions"><button id="exportBtn" class="primary">Export .fip</button><label class="importLabel">Import .fip<input id="importFile" type="file" accept=".fip,application/json" hidden /></label><button id="clearBtn" class="danger">Clear Test Case</button></div><pre id="preview"></pre></div></section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
