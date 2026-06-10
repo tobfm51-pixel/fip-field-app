@@ -28,10 +28,13 @@ let state = migrate(load());
 let current = 'dashboard';
 let autosaveTimer = null;
 
+function inactiveBlank(){ const fresh = blank(); fresh.case.active = false; return fresh; }
+function hasActiveCase(){ return state?.case?.active === true; }
+function activateCase(){ state.case.active = true; state.case.updatedAt = new Date().toISOString(); }
 function load(){
   try{ const raw = localStorage.getItem(STORE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
   for(const k of LEGACY_KEYS){ try{ const raw = localStorage.getItem(k); if(raw) return JSON.parse(raw); }catch(e){} }
-  return blank();
+  return inactiveBlank();
 }
 function migrate(data){
   const base = blank();
@@ -117,13 +120,27 @@ function bindInputs(){
   content.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click', handleAction));
 }
 function setTitle(t){ titleEl.textContent=t; }
-function render(screen=current){ current=screen; document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active',b.dataset.screen===screen)); const map={dashboard,initial,building,people,vehicles,machinery,rooms,photos,evidence,interviews,reports,files}; content.innerHTML = (map[screen]||dashboard)(); bindInputs(); }
+function noActiveCaseScreen(){
+  setTitle('No Active Case');
+  return `<div class="grid full">${card('Active Case Required',`<div class="warn">Create a new case or open a .fip file from the dashboard before using this module.</div><div class="actions"><button class="btn secondary" data-action="goDashboard">Back to Dashboard</button></div>`)}</div>`;
+}
+function render(screen=current){
+  const requested = screen || 'dashboard';
+  current = requested;
+  document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active',b.dataset.screen===requested));
+  const map={dashboard,initial,building,people,vehicles,machinery,rooms,photos,evidence,interviews,reports,files};
+  content.innerHTML = requested !== 'dashboard' && !hasActiveCase() ? noActiveCaseScreen() : (map[requested]||dashboard)();
+  bindInputs();
+}
 
 document.querySelectorAll('.rail-btn').forEach(b=>b.addEventListener('click',()=>render(b.dataset.screen)));
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
 function dashboard(){
   setTitle('Case Dashboard');
+  if(!hasActiveCase()){
+    return `<div class="grid full">${card('No Active Case',`<div class="warn">No case is active. Create a new case or open a .fip file to begin.</div><div class="actions"><button class="btn secondary" data-action="newCase">New Case</button><button class="btn secondary" data-action="importFip">Open .fip</button></div>`)}</div>`;
+  }
   const c = caseEngine.summary();
   const missing = caseEngine.requiredMissing();
   const counts = [['People',state.people.length],['Evidence',state.evidence.length],['Interviews',state.interviews.length],['Photos',state.photos.length]];
@@ -163,10 +180,10 @@ function windowCard(x,i,k){ return commonItem(x,i,k,`Window ${x.number||i+1}`,`$
 function photoCard(x,i,k){ return commonItem(x,i,k,`Photo ${x.number||i+1}`,`${dynField(k,i,'number','Photo #')}${dynField(k,i,'date','Photo Date','date')}${dynField(k,i,'photographer','Photographer')}${dynField(k,i,'location','Photo Location')}${dynField(k,i,'description','Description','textarea')}${dynField(k,i,'notes','Notes','textarea')}`); }
 function evidenceCard(x,i,k){ return commonItem(x,i,k,`Evidence ${x.number||i+1}`,`${dynField(k,i,'number','Evidence #')}${dynField(k,i,'description','Description','textarea')}${dynField(k,i,'location','Location Collected')}${dynField(k,i,'collectedBy','Collected By')}${dynField(k,i,'date','Date Collected','date')}${dynField(k,i,'packaging','Packaging')}${dynField(k,i,'lab','Lab / Submission')}${dynField(k,i,'notes','Notes','textarea')}`); }
 function interviewCard(x,i,k){ return commonItem(x,i,k,`${x.guide||'Interview'}: ${x.person||'Unnamed'}`,`${dynField(k,i,'guide','Guide / Type','select',{options:['General','Firefighter Observation','Owner','Employee','Contractor','Discoverer / First Witness','Neighborhood Canvass','Case Solvability']})}${dynField(k,i,'person','Person Interviewed')}${dynField(k,i,'date','Date','date')}${dynField(k,i,'time','Time','time')}${dynField(k,i,'location','Location')}${dynField(k,i,'summary','Summary','textarea')}${dynField(k,i,'followUp','Follow-up Needed','textarea')}`); }
-function handleAction(e){ const a=e.currentTarget.dataset.action, key=e.currentTarget.dataset.key; if(a==='add'){ state[key].push(templates[key]()); save(); render(current); } if(a==='remove'){ state[key].splice(Number(e.currentTarget.dataset.index),1); save(); render(current); } if(a==='addInterview'){ state.interviews.push(interviewTemplate(e.currentTarget.dataset.guide)); save(); render('interviews'); } if(a==='exportFip') exportFip(false); if(a==='shareFip') exportFip(true); if(a==='importFip') $('#importFile').click(); if(a==='newCase') { if(confirm('Create a new blank case? Export the current case first if needed.')) caseEngine.create(); } if(a==='copyReport'){ navigator.clipboard?.writeText(reportText()); saveStatus.textContent='Report copied'; }}
+function handleAction(e){ const a=e.currentTarget.dataset.action, key=e.currentTarget.dataset.key; if(a==='goDashboard') render('dashboard'); if(a==='add'){ state[key].push(templates[key]()); save(); render(current); } if(a==='remove'){ state[key].splice(Number(e.currentTarget.dataset.index),1); save(); render(current); } if(a==='addInterview'){ state.interviews.push(interviewTemplate(e.currentTarget.dataset.guide)); save(); render('interviews'); } if(a==='exportFip') exportFip(false); if(a==='shareFip') exportFip(true); if(a==='importFip') $('#importFile').click(); if(a==='newCase') { if(confirm('Create a new blank case? Export the current case first if needed.')) caseEngine.create(); } if(a==='copyReport'){ navigator.clipboard?.writeText(reportText()); saveStatus.textContent='Report copied'; }}
 const templates={people:personTemplate,vehicles:vehicleTemplate,machinery:machineTemplate,rooms:roomTemplate,windows:windowTemplate,photos:photoTemplate,evidence:evidenceTemplate,interviews:interviewTemplate};
 function filename(){ const c=(state.initial.caseNumber||'FIP_Case').replace(/[^a-z0-9_-]/gi,'_'); return `${c}.fip`; }
 async function exportFip(share){ save(); const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const file=new File([blob], filename(), {type:'application/json'}); if(share && navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'FIP Case File'}); return; } const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename(); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); }
-$('#importFile').addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f) return; try{ const txt=await f.text(); state=migrate(JSON.parse(txt)); save(); render('dashboard'); }catch(err){ alert('Could not import that .fip file.'); } e.target.value=''; });
+$('#importFile').addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f) return; try{ const txt=await f.text(); state=migrate(JSON.parse(txt)); activateCase(); save(); render('dashboard'); }catch(err){ alert('Could not import that .fip file.'); } e.target.value=''; });
 function reportText(){ const i=state.initial,b=state.building,r=state.report; const total=(Number(r.structureLoss||0)+Number(r.contentsLoss||0))||''; return `Case#: ${i.caseNumber || '[CASE NUMBER]'} - Summary Investigative Report\nType: ${i.incidentType || '[TYPE]'} - ${i.incidentAddress || '[ADDRESS]'}\nReported: ${i.reportedDate || i.dateNotified || '[DATE]'} ${i.reportedTime || i.timeNotified || '[TIME]'}\nInvestigator: ${state.settings.investigator || '[INVESTIGATOR]'}\n\nNARRATIVE:\nOn ${i.dateNotified || '[DATE]'}, at ${i.timeNotified || '[TIME]'}, I was dispatched to the above-listed address to conduct a fire origin and cause investigation.\n\nThe property was documented as ${b.propertyDescription || '[PROPERTY DESCRIPTION]'} with ${b.constructionType || '[CONSTRUCTION TYPE]'} construction. The investigator documented the area of origin as ${r.areaOfOrigin || '[AREA OF ORIGIN]'}.\n\nThe investigator classified the cause as ${r.causeClassification || i.cause || '[CAUSE CLASSIFICATION]'}. The investigator documented the ignition source as ${r.ignitionSource || '[IGNITION SOURCE]'}, which ignited ${r.firstFuel || '[FIRST FUEL]'}, utilizing ${r.oxidizingAgent || 'normal atmospheric oxygen'} as the oxidizing agent.\n\nThe estimated dollar loss for this incident was $${r.structureLoss || '0'} in structure damage and $${r.contentsLoss || '0'} in contents, totaling $${total || '0'}.\n\n${r.narrative || ''}\n\nSTATUS: ${r.status || 'Open'}`; }
 render('dashboard'); save();
