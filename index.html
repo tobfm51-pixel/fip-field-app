@@ -1,1 +1,42 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Fire Investigation Field Notes"><title>Fire Investigation Field Notes</title><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="stylesheet" href="style.css"></head><body><div id="app"><aside class="rail" id="rail"></aside><main><header><div><div class="eyebrow">Fire Investigation Field Notes</div><h1 id="title">Dashboard</h1></div><button id="saveBtn" class="pill">Save</button></header><section id="screen"></section></main></div><input id="fileImport" type="file" accept=".fip,application/json" hidden><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Fire Field Notes" />
+  <meta name="theme-color" content="#111827" />
+  <title>Fire Investigation Field Notes</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <aside class="rail" aria-label="Primary navigation">
+      <button class="rail-btn active" data-screen="dashboard" title="Dashboard">⌂<span>Home</span></button>
+      <button class="rail-btn" data-screen="initial" title="Initial">🚒<span>Initial</span></button>
+      <button class="rail-btn" data-screen="building" title="Building">⌂<span>Bldg</span></button>
+      <button class="rail-btn" data-screen="people" title="People">👥<span>People</span></button>
+      <button class="rail-btn" data-screen="vehicles" title="Vehicles">🚗<span>Vehicle</span></button>
+      <button class="rail-btn" data-screen="machinery" title="Machinery">⚙<span>Machine</span></button>
+      <button class="rail-btn" data-screen="rooms" title="Rooms">▦<span>Rooms</span></button>
+      <button class="rail-btn" data-screen="photos" title="Photos">📷<span>Photos</span></button>
+      <button class="rail-btn" data-screen="evidence" title="Evidence">▣<span>Evidence</span></button>
+      <button class="rail-btn" data-screen="interviews" title="Interviews">❝<span>Interview</span></button>
+      <button class="rail-btn" data-screen="reports" title="Reports">▤<span>Report</span></button>
+      <button class="rail-btn" data-screen="files" title="Files">⇪<span>Files</span></button>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div><div class="eyebrow">FIP Alpha 0.5</div><h1 id="screenTitle">Fire Investigation Field Notes</h1></div>
+        <div class="status"><span id="saveStatus">Autosaved</span></div>
+      </header>
+      <section id="content" class="content"></section>
+    </main>
+  </div>
+  <input id="importFile" type="file" accept=".fip,application/json" hidden />
+  <script src="app.js"></script>
+</body>
+</html>
