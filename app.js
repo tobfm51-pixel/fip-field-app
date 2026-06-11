@@ -85,7 +85,6 @@ function migrateUtilities(utilities){
   if(!utilities || typeof utilities !== 'object') return;
   const presentMap = {On:'Yes', Off:'No', None:'No'};
   if(presentMap[utilities.gasOn]) utilities.gasOn = presentMap[utilities.gasOn];
-  if(!utilities.gasOn && utilities.fuelType === 'Natural Gas') utilities.gasOn = 'Yes';
   if(!utilities.lpTank && utilities.fuelType === 'Propane') utilities.lpTank = 'Yes';
 }
 function migratePerson(person){
