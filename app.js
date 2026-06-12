@@ -5,7 +5,38 @@ const $ = s => document.querySelector(s);
 const content = $('#content');
 const titleEl = $('#screenTitle');
 const saveStatus = $('#saveStatus');
+const sectionNav = $('#sectionNav');
 const INCIDENT_TYPES = ['Structure','Vehicle','Machinery','Outside Fire','Explosion','Other'];
+
+const SCREEN_REGISTRY = [
+  {id:'dashboard', icon:'⌂', label:'Home', title:'Dashboard', accepted:true},
+  {id:'initial', icon:'🚒', label:'Initial', title:'Initial Information', accepted:true},
+  {id:'scene', icon:'◇', label:'Scene', title:'Initial Scene Assessment', accepted:true},
+  {id:'building', icon:'⌂', label:'Bldg', title:'Building', accepted:true},
+  {id:'utilities', icon:'⚡', label:'Util', title:'Utilities', accepted:true},
+  {id:'electrical', icon:'⏚', label:'Elec', title:'Electrical', accepted:true},
+  {id:'exterior', icon:'▱', label:'Exterior', title:'Exterior Examination', accepted:true},
+  {id:'roof', icon:'⌃', label:'Roof', title:'Roof Examination', accepted:true},
+  {id:'deck', icon:'▭', label:'Deck', title:'Deck', accepted:false},
+  {id:'interior', icon:'▦', label:'Interior', title:'Interior Examination', accepted:true},
+  {id:'people', icon:'👥', label:'People', title:'People / Interested Parties', accepted:true},
+  {id:'vehicles', icon:'🚗', label:'Vehicle', title:'Vehicles', accepted:true},
+  {id:'machinery', icon:'⚙', label:'Machine', title:'Machinery / Equipment', accepted:true},
+  {id:'exposures', icon:'⌂', label:'Expose', title:'Exposure Structures', accepted:true},
+  {id:'rooms', icon:'▦', label:'Rooms', title:'Rooms / Windows / Electrical', accepted:true},
+  {id:'smokeAlarms', icon:'◉', label:'Alarms', title:'Repeatable Smoke Alarms', accepted:false},
+  {id:'areaOrigin', icon:'◎', label:'Origin', title:'Area(s) of Origin', accepted:true},
+  {id:'firePatterns', icon:'▧', label:'Pattern', title:'Fire Patterns', accepted:true},
+  {id:'ignitionSources', icon:'♨', label:'Ignition', title:'Potential Ignition Sources', accepted:true},
+  {id:'ignitionMatrix', icon:'▥', label:'Matrix', title:'Ignition Source Assessment Matrix', accepted:true},
+  {id:'photos', icon:'📷', label:'Photos', title:'Photos', accepted:true},
+  {id:'evidence', icon:'▣', label:'Evidence', title:'Evidence', accepted:true},
+  {id:'interviews', icon:'❝', label:'Interview', title:'Interviews', accepted:true},
+  {id:'tasks', icon:'☑', label:'Tasks', title:'Tasks', accepted:false},
+  {id:'reports', icon:'▤', label:'Report', title:'Reports', accepted:true},
+  {id:'files', icon:'⇪', label:'Files', title:'Files / Export', accepted:true}
+];
+
 
 const blank = () => {
   const now = new Date().toISOString();
@@ -190,6 +221,10 @@ function updateCaseRibbon(){
   const chips = [['Case', c.caseNumber || 'No case #'], ['Type', c.incidentType || 'Unknown'], ['Address', c.incidentAddress || 'No address'], ['Status', c.caseStatus || 'Draft']];
   ribbon.innerHTML = chips.map(([label,value]) => `<div class="ribbon-chip"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join('');
 }
+function renderSectionNav(activeScreen=current){
+  if(!sectionNav) return;
+  sectionNav.innerHTML = SCREEN_REGISTRY.map(screen => `<button class="rail-btn ${screen.id===activeScreen?'active':''}" data-screen="${screen.id}" title="${esc(screen.title)}" type="button">${screen.icon}<span>${esc(screen.label)}</span></button>`).join('');
+}
 function noActiveCaseScreen(){
   setTitle('No Active Case');
   return `<div class="grid full">${card('Active Case Required',`<div class="warn">Create a new case or open a .fip file from the dashboard before using this module.</div><div class="actions"><button class="btn secondary" data-action="goDashboard">Back to Dashboard</button></div>`)}</div>`;
@@ -197,14 +232,14 @@ function noActiveCaseScreen(){
 function render(screen=current){
   const requested = screen || 'dashboard';
   current = requested;
-  document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active',b.dataset.screen===requested));
+  renderSectionNav(requested);
   updateCaseRibbon();
   const map={dashboard,initial,scene,building,deck,utilities,electrical,exterior,roof,interior,rooms,areaOrigin,firePatterns,ignitionSources,ignitionMatrix,people,vehicles,machinery,exposures,photos,evidence,interviews,smokeAlarms,tasks,reports,files};
   content.innerHTML = requested !== 'dashboard' && !hasActiveCase() ? noActiveCaseScreen() : (map[requested]||dashboard)();
   bindInputs();
 }
 
-document.querySelectorAll('.rail-btn').forEach(b=>b.addEventListener('click',()=>render(b.dataset.screen)));
+sectionNav?.addEventListener('click', e=>{ const button=e.target.closest('[data-screen]'); if(button) render(button.dataset.screen); });
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
 function dashboard(){
