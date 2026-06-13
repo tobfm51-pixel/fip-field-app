@@ -162,7 +162,6 @@ A case becomes active only when the user:
 - Case Number
 - Incident Type
 - Incident Address
-- Jurisdiction
 - Primary Investigator
 - Assisted By
 - Case Status
