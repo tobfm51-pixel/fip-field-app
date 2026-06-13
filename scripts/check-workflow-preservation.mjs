@@ -18,9 +18,9 @@ const missingFunctions = allScreens.filter(screen => !new RegExp(`function\\s+${
 const requiredText = [
   'function newCaseWizard', 'defaultFmNumber', 'FM Report Number', 'visibleScreens', 'Roof Style', 'roofSvg',
   'panelType', 'Main Panel', 'Subpanel', 'Labeled As', 'Single Pole', 'settings.evidencePrefix',
-  'settings.photoPrefix', 'lastEvidenceCollector', 'propertyCounter', 'station', 'locker', 'personId',
+  'settings.photoPrefix', 'lastEvidenceCollector', 'evidenceSecured', 'dateSecured', 'timeSecured', 'lockerStorageLocation', 'personId',
   'INTERVIEW_PROMPTS', 'questions:promptsForInterviewType', 'whyConsidered', 'observations', 'crispNotesText',
-  'initialReportText', 'timelineEvents', 'Submit Initial Report', 'Upload Photos to Google Drive',
+  'initialReportText', 'timelineEvents', 'evidenceDispositionLines', 'LCSO Property Counter', 'FMO Evidence Storage Locker', 'Submit Initial Report', 'Upload Photos to Google Drive',
   'Upload Photos to LCSO Digital Evidence Platform'
 ];
 const missingRequiredText = requiredText.filter(text => !app.includes(text));
@@ -29,6 +29,7 @@ const forbidden = [];
 if(app.toLowerCase().includes(forbiddenLiteral)) forbidden.push('removed field still present in app.js');
 if(html.toLowerCase().includes(forbiddenLiteral)) forbidden.push('removed field still present in index.html');
 if(app.includes('Area ' + 'Served')) forbidden.push('old breaker label still present');
+if(app.includes('property' + 'Counter')) forbidden.push('old evidence yes/no control still present');
 if(app.includes("checks('Rol" + "es'")) forbidden.push('multi-select person role still present');
 if(app.includes('Section Completion ' + 'Tracking')) forbidden.push('section-completion dashboard was reintroduced');
 

@@ -17,6 +17,7 @@ This checklist documents the current PR revision. The scope is the accepted desk
 | Final Area of Origin is at bottom of AO workflow | YES | `areaOrigin()` renders candidates first and the final determination card last. |
 | Potential Ignition Sources keep observations and why considered | YES | `ignitionSourceCard()` renders Observations and Why Considered without testing/status fields. |
 | Evidence/photo prefix with auto-increment numbering | YES | `settings.evidencePrefix`, `settings.photoPrefix`, and `nextNumber()` drive new item numbers. |
+| Evidence secured disposition | YES | Evidence uses the requested secured-location choices, editable secured date/time, conditional locker/storage field, and report exports. |
 | Interview questions populate by interview type | YES | `INTERVIEW_PROMPTS`, `syncInterviewQuestions()`, and `interviewQuestionFields()` render type-specific questions. |
 
 ## Existing accepted workflow screens/modules
