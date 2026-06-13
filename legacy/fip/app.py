@@ -84,7 +84,7 @@ class FIPApp(tk.Tk):
         self.interested_count = 0
         self.ignition_count = 0
         self.panel_count = 0
-        self.item_counts = {"Vehicle":0, "Machinery / Equipment":0, "Appliance":0, "Battery / Energy Storage":0, "Injury / Fatality":0, "Other Item":0}
+        self.item_counts = {"Vehicle":0, "Machinery / Equipment":0, "Exposure":0, "Injury / Fatality":0, "Other":0}
         self._style()
         self._build()
 
@@ -613,7 +613,7 @@ class FIPApp(tk.Tk):
         win.geometry("360x280")
         ttk.Label(win, text="Select item to add:").pack(anchor="w", padx=12, pady=10)
         choice = tk.StringVar(value="Vehicle")
-        for item in ["Vehicle", "Machinery / Equipment", "Appliance", "Battery / Energy Storage", "Injury / Fatality", "Other Item"]:
+        for item in ["Vehicle", "Machinery / Equipment", "Exposure", "Injury / Fatality", "Other"]:
             ttk.Radiobutton(win, text=item, variable=choice, value=item).pack(anchor="w", padx=20)
         def add():
             self.add_item_tab(choice.get())
@@ -639,12 +639,6 @@ class FIPApp(tk.Tk):
             self.row_combo(s, "State", f"{prefix}_plate_state", STATE_VALUES, 2, 2, width=8)
             self.row_combo(s, "Fuel Source", f"{prefix}_fuel", ["", "Gasoline", "Diesel", "Hybrid", "Electric", "Other"], 3, width=18)
             self.text_box(s, "Vehicle Notes", f"{prefix}_notes", 8)
-        elif item_type == "Battery / Energy Storage":
-            self.row_entry(s, "Device / Battery", f"{prefix}_device", 0, width=40)
-            self.row_entry(s, "Brand", f"{prefix}_brand", 1, width=24)
-            self.row_entry(s, "Model", f"{prefix}_model", 1, 2, width=24)
-            self.row_combo(s, "Battery Type", f"{prefix}_battery_type", ["", "Lithium-ion", "Alkaline", "NiCad", "NiMH", "Other"], 2, width=18)
-            self.text_box(s, "Battery / Charging / Usage Notes", f"{prefix}_notes", 10)
         elif item_type == "Injury / Fatality":
             self.row_combo(s, "Type", f"{prefix}_type", ["", "Injury", "Fatality"], 0, width=18)
             self.row_entry(s, "Name", f"{prefix}_name", 1, width=30)

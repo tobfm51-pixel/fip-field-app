@@ -45,3 +45,4 @@ h1{font-size:22px;line-height:1.15;margin:2px 0 0}
 @media (min-width:1200px){
   .rail{width:104px}.content{padding:28px;max-width:1120px}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+.rail-btn.module-hidden{display:none}
