@@ -1,13 +1,16 @@
 {
   "name": "Fire Investigation Field Notes",
-  "short_name": "Fire Notes",
+  "short_name": "FIP Field",
+  "description": "Mobile-first PWA presentation for the accepted Fire Investigation Platform workflow.",
+  "id": "./index.html",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#111827",
   "orientation": "portrait-primary",
   "icons": [
-    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png"},
-    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png"}
+    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
 }
