@@ -9,7 +9,7 @@ const acceptedScreens = [
   'ignitionMatrix', 'photos', 'evidence', 'interviews', 'reports', 'files'
 ];
 
-const requiredMobileAdditions = ['deck', 'smokeAlarms', 'tasks'];
+const requiredMobileAdditions = ['deck', 'smokeAlarms', 'timeline', 'tasks'];
 const allScreens = [...acceptedScreens, ...requiredMobileAdditions];
 
 const missingNav = allScreens.filter(screen => !app.includes(`id:'${screen}'`) && !app.includes(`id:"${screen}"`));
@@ -17,10 +17,10 @@ const missingRenderMap = allScreens.filter(screen => !new RegExp(`const map=\\{[
 const missingFunctions = allScreens.filter(screen => !new RegExp(`function\\s+${screen}\\s*\\(`).test(app));
 
 const acceptedDataPaths = [
-  'initial.caseNumber', 'caller.name', 'fireDept.department', 'environment.temperature', 'scene.narrative',
-  'exterior.front', 'building.propertyDescription', 'lifeSafety.smokeAlarms', 'utilities.electricProvider',
-  'electrical.serviceNotes', 'interior.firstFloor', 'rooms', 'windows', 'originAreas', 'firePatterns',
-  'ignitionSources', 'ignitionMatrix', 'exposureStructures', 'photos', 'evidence', 'interviews', 'report.areaOfOrigin'
+  'initial.caseNumber', 'initial.cause', 'fireDept.fdNotes', 'caller.name', 'fireDept.department', 'environment.temperature', 'scene.narrative',
+  'exterior.front', 'exterior.right', 'exterior.rear', 'exterior.left', 'building.propertyDescription', 'building.alarmNotes', 'lifeSafety.smokeAlarms', 'utilities.electricProvider',
+  'electrical.serviceNotes', 'panelType', 'breakerLayout', 'interior.firstFloor', 'rooms', 'windows', 'originAreas', 'firePatterns',
+  'ignitionSources', 'ignitionMatrix', 'exposureStructures', 'photos', 'evidence', 'propertyCounter', 'station', 'locker', 'interviews', 'personId', 'INTERVIEW_PROMPTS', 'timelineEvents', 'crispNotesText', 'initialReportText', 'sectionStatus', 'report.areaOfOrigin'
 ];
 const missingDataPaths = acceptedDataPaths.filter(path => !app.includes(path));
 

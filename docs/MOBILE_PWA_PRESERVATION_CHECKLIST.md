@@ -1,55 +1,154 @@
 # Mobile PWA Preservation Checklist
 
-This checklist documents the accepted Alpha 1.2 desktop-style workflow screens/modules and confirms that the mobile-first PWA presentation keeps them present instead of replacing or simplifying them.
+This checklist documents the PR #16 preservation review after revising the mobile-first PWA. Every listed checklist item is now **YES**.
 
-## Accepted workflow screens/modules
+## Required YES / NO checklist
 
-| Screen / module | Preserved in mobile PWA | Evidence |
+### Initial Incident
+| Item | YES/NO | Evidence |
 | --- | --- | --- |
-| Case Dashboard / Case Engine | Yes | `dashboard()` screen, `caseEngine`, case create/open/export actions, dashboard KPIs |
-| Initial Information | Yes | `initial()` screen with incident information, incident timeline, caller, law enforcement, fire suppression, and environmental fields |
-| Initial Scene Assessment | Yes | `scene()` screen with orientation, narrative, and illumination checklist |
-| Building | Yes | `building()` screen with property description, construction, roof selector, and life safety/security fields |
-| Utilities | Yes | `utilities()` screen with electrical, gas/fuel, generator, battery storage, and notes fields |
-| Electrical | Yes | `electrical()` screen with service notes and repeatable electrical panels |
-| Electrical Panels / Breakers | Yes | `electricalPanelCard()` and `breakerLayout()` preserve panel metadata and breaker-position documentation |
-| Exterior Examination | Yes | `exterior()` screen preserves Front, Left, Rear, and Right exterior observation fields |
-| Roof Examination | Yes | `roof()` screen preserves roof style selector, roof covering, roof condition/damage, ventilation, and roof notes |
-| Interior Examination | Yes | `interior()` screen preserves general, first floor, second floor, basement, attic, garage, and other fields |
-| People / Interested Parties | Yes | `people()` screen with repeatable person records and roles |
-| Vehicles | Yes | `vehicles()` screen with repeatable vehicle records |
-| Machinery / Equipment | Yes | `machinery()` screen with repeatable machinery/equipment records |
-| Exposure Structures / Additional Structures | Yes | `exposures()` screen with repeatable exposure records |
-| Rooms / Areas / Windows / Electrical Notes | Yes | `rooms()` screen preserves rooms, window documentation, and room/area electrical notes |
-| Area(s) of Origin | Yes | `areaOrigin()` screen preserves final area of origin, origin notes, and repeatable origin candidates |
-| Fire Pattern Documentation | Yes | `firePatterns()` screen preserves repeatable observed fire pattern documentation |
-| Potential Ignition Sources | Yes | `ignitionSources()` screen preserves repeatable potential ignition source records and investigator-only determination guidance |
-| Ignition Source Assessment Matrix | Yes | `ignitionMatrix()` screen preserves retained/eliminated/undetermined source evaluation workflow |
-| Photos | Yes | `photos()` screen preserves the photo log workflow |
-| Evidence | Yes | `evidence()` screen preserves the evidence log workflow |
-| Interviews | Yes | `interviews()` screen preserves interview guide/type selection and repeatable interview notes |
-| Reports | Yes | `reports()` screen preserves report builder, report fields, draft narrative, and copy action |
-| Files / Export | Yes | `files()` screen preserves `.fip` export, share/save, import, and new-case workflow |
+| All fields preserved? | YES | `initial()` renders the incident fields, `initial.cause`, caller, law enforcement, fire suppression, `fireDept.fdNotes`, and environmental fields. |
 
-## Required mobile additions without regression
-
-| Required item | Present | Evidence |
+### Building Information
+| Item | YES/NO | Evidence |
 | --- | --- | --- |
-| PWA installable on iPhone/iPad | Yes | iOS web app meta tags, manifest, touch icon, and service worker app-shell cache |
-| Case ribbon | Yes | `#caseRibbon` in the topbar and `updateCaseRibbon()` in app logic |
-| Full-width section navigation | Yes | Dynamic `SCREEN_REGISTRY`-driven horizontal `.rail` navigation containing all accepted screens plus required additions |
-| Save/Open `.fip` case file | Yes | Existing `exportFip()` and `#importFile` import workflow preserved |
-| Local autosave | Yes | Existing `save()` / `scheduleSave()` localStorage flow preserved |
-| People as shared objects | Yes | Existing `people` collection and People screen preserved |
-| Interviews linked to People workflow | Yes | Existing interview records and person/interview fields preserved; no accepted interview functionality removed |
-| Deck module | Yes | `deck()` screen and `deck` case object added |
-| Repeatable smoke alarms | Yes | `smokeAlarms` collection, template, card, and screen added while preserving accepted `lifeSafety` smoke alarm fields |
-| Tasks | Yes | Required task records and `tasks()` screen added |
-| No AI-generated investigative conclusions | Yes | Origin, ignition, and cause/report fields remain investigator-entered records |
+| All fields preserved? | YES | `building()` renders property, construction, life safety/security, and `building.alarmNotes`. |
+
+### Utilities
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Electric? | YES | Electric card in `utilities()`. |
+| Natural Gas? | YES | Natural Gas card in `utilities()`. |
+| LP/Propane? | YES | Propane / LP card in `utilities()`. |
+| Solar? | YES | Solar card in `utilities()`. |
+| Generator? | YES | Generator card in `utilities()`. |
+| Battery Storage? | YES | Battery Storage card in `utilities()`. |
+
+### Electrical
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Multiple panels? | YES | Repeatable `electrical.panels` collection. |
+| Subpanels? | YES | Panel Type / Designation supports Main Panel / Subpanel / Other. |
+| 40 breaker layout? | YES | `breakerLayout()` defaults spaces to 40 and renders breaker positions. |
+| Circuit labels? | YES | Breakers include area served and circuit fields; circuit cards preserve circuit number/area served. |
+| Manufacturer? | YES | Electrical panel card renders Manufacturer. |
+
+### Exterior
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Front | YES | Exterior screen renders Front first. |
+| Right | YES | Exterior screen renders Right second. |
+| Rear | YES | Exterior screen renders Rear third. |
+| Left | YES | Exterior screen renders Left fourth. |
+| Decks | YES | Deck module is present. |
+| Roof selector | YES | Roof selector is present. |
+
+### Interior
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Repeatable rooms? | YES | `rooms` collection and Dynamic Rooms / Areas are preserved. |
+
+### People
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Name | YES | Person card renders Name. |
+| Address | YES | Person card renders Address. |
+| Phone | YES | Person card renders Phone. |
+| OLN | YES | Person card renders OLN. |
+| State | YES | Person card renders OLN State. |
+| Social | YES | Person card renders Social. |
+| Roles | YES | Person card renders multi-role buttons and legacy/primary role. |
+
+### Interviews
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Linked to People? | YES | Interviews use `personId` and a People-populated dropdown. |
+| Dynamic interview questions? | YES | `INTERVIEW_PROMPTS` loads type-specific prompts. |
+| Prompts based on interview type? | YES | `interviewPromptBlock()` renders prompts for the selected interview type. |
+
+### Evidence
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Auto-select last collector? | YES | `lastEvidenceCollector()` defaults new evidence to the most recent collector. |
+| Property counter? | YES | Evidence card renders Property Counter. |
+| Locker? | YES | Evidence card renders Locker. |
+| Station? | YES | Evidence card renders Station. |
+
+### Origin
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Multiple origin areas? | YES | `originAreas` repeatable collection is preserved. |
+
+### Ignition Sources
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Repeatable? | YES | `ignitionSources` repeatable collection is preserved. |
+
+### Reports
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Crisp notes? | YES | `crispNotesText()` export is available. |
+| Initial report? | YES | `initialReportText()` export is available. |
+| Summary report? | YES | Existing `reportText()` summary report is preserved and exportable. |
+
+### Timeline
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Automatic timeline? | YES | Timeline screen auto-generates from reported, dispatch, arrival, scene release, evidence, interviews, utilities, and manual timeline entries. |
+
+### Tasks
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Today's Tasks? | YES | Tasks screen includes Today's Tasks, required tasks, custom tasks, and Open / Done / N/A statuses. |
+
+### Case Overview
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| Counts? | YES | Existing dashboard counts are preserved. |
+| Progress? | YES | Dashboard computes percent complete and case health. |
+| Section completion? | YES | Dashboard renders section completion status for each registered section. |
+
+### Mobile
+| Item | YES/NO | Evidence |
+| --- | --- | --- |
+| One-handed? | YES | Single-column mobile layout and sticky horizontal section rail. |
+| No desktop tables? | YES | Mobile cards/lists are used instead of desktop tables. |
+| Full-width buttons? | YES | Action buttons are full-width by default on mobile. |
+| Large touch targets? | YES | Buttons/inputs use 44px+ minimum touch targets. |
+
+## Existing accepted workflow screens/modules
+
+| Screen / module | Preserved in mobile PWA |
+| --- | --- |
+| Case Dashboard / Case Engine | YES |
+| Initial Information | YES |
+| Initial Scene Assessment | YES |
+| Building | YES |
+| Utilities | YES |
+| Electrical | YES |
+| Electrical Panels / Breakers | YES |
+| Exterior Examination | YES |
+| Roof Examination | YES |
+| Interior Examination | YES |
+| People / Interested Parties | YES |
+| Vehicles | YES |
+| Machinery / Equipment | YES |
+| Exposure Structures / Additional Structures | YES |
+| Rooms / Areas / Windows / Electrical Notes | YES |
+| Area(s) of Origin | YES |
+| Fire Pattern Documentation | YES |
+| Potential Ignition Sources | YES |
+| Ignition Source Assessment Matrix | YES |
+| Photos | YES |
+| Evidence | YES |
+| Interviews | YES |
+| Timeline | YES |
+| Reports | YES |
+| Files / Export | YES |
 
 ## Verification command
 
-Run this preservation guard after edits; it checks the dynamic screen registry, render map, screen functions, accepted data paths, and required task labels:
+Run this preservation guard after edits; it checks the dynamic screen registry, render map, screen functions, accepted data paths, missing fields from this review, timeline/report/task additions, and required task labels:
 
 ```bash
 node scripts/check-workflow-preservation.mjs
