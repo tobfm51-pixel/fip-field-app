@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Fire Field Notes" />
+  <meta name="apple-mobile-web-app-title" content="FIP Field" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#111827" />
+  <meta name="format-detection" content="telephone=no" />
   <title>Fire Investigation Field Notes</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
@@ -14,36 +16,18 @@
 </head>
 <body>
   <div id="app" class="app-shell">
-    <aside class="rail" aria-label="Primary navigation">
-      <button class="rail-btn active" data-screen="dashboard" title="Dashboard">⌂<span>Home</span></button>
-      <button class="rail-btn" data-screen="initial" title="Initial">🚒<span>Initial</span></button>
-      <button class="rail-btn" data-screen="scene" title="Scene">◇<span>Scene</span></button>
-      <button class="rail-btn" data-screen="building" title="Building">⌂<span>Bldg</span></button>
-      <button class="rail-btn" data-screen="utilities" title="Utilities">⚡<span>Util</span></button>
-      <button class="rail-btn" data-screen="electrical" title="Electrical">⏚<span>Elec</span></button>
-      <button class="rail-btn" data-screen="exterior" title="Exterior">▱<span>Exterior</span></button>
-      <button class="rail-btn" data-screen="roof" title="Roof">⌃<span>Roof</span></button>
-      <button class="rail-btn" data-screen="interior" title="Interior">▦<span>Interior</span></button>
-      <button class="rail-btn" data-screen="people" title="People">👥<span>People</span></button>
-      <button class="rail-btn" data-screen="vehicles" title="Vehicles">🚗<span>Vehicle</span></button>
-      <button class="rail-btn" data-screen="machinery" title="Machinery">⚙<span>Machine</span></button>
-      <button class="rail-btn" data-screen="exposures" title="Exposure Structures">⌂<span>Expose</span></button>
-      <button class="rail-btn" data-screen="rooms" title="Rooms">▦<span>Rooms</span></button>
-      <button class="rail-btn" data-screen="areaOrigin" title="Area of Origin">◎<span>Origin</span></button>
-      <button class="rail-btn" data-screen="firePatterns" title="Fire Patterns">▧<span>Pattern</span></button>
-      <button class="rail-btn" data-screen="ignitionSources" title="Ignition Sources">♨<span>Ignition</span></button>
-      <button class="rail-btn" data-screen="ignitionMatrix" title="Ignition Matrix">▥<span>Matrix</span></button>
-      <button class="rail-btn" data-screen="photos" title="Photos">📷<span>Photos</span></button>
-      <button class="rail-btn" data-screen="evidence" title="Evidence">▣<span>Evidence</span></button>
-      <button class="rail-btn" data-screen="interviews" title="Interviews">❝<span>Interview</span></button>
-      <button class="rail-btn" data-screen="reports" title="Reports">▤<span>Report</span></button>
-      <button class="rail-btn" data-screen="files" title="Files">⇪<span>Files</span></button>
-    </aside>
+    <header class="topbar">
+      <div class="title-block">
+        <div class="eyebrow">FIP Alpha 1.2 · Mobile PWA</div>
+        <h1 id="screenTitle">Fire Investigation Field Notes</h1>
+      </div>
+      <div class="status"><span id="saveStatus">Autosaved</span></div>
+      <div id="caseRibbon" class="case-ribbon" aria-label="Case ribbon"></div>
+    </header>
+
+    <nav id="sectionNav" class="rail" aria-label="Primary section navigation"></nav>
+
     <main class="main">
-      <header class="topbar">
-        <div><div class="eyebrow">FIP Alpha 1.2</div><h1 id="screenTitle">Fire Investigation Field Notes</h1></div>
-        <div class="status"><span id="saveStatus">Autosaved</span></div>
-      </header>
       <section id="content" class="content"></section>
     </main>
   </div>
