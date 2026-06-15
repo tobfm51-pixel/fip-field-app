@@ -5,7 +5,7 @@ const html = fs.readFileSync('index.html', 'utf8');
 
 const acceptedScreens = [
   'dashboard', 'initial', 'scene', 'building', 'utilities', 'electrical', 'exterior', 'roof', 'interior',
-  'people', 'vehicles', 'machinery', 'exposures', 'rooms', 'areaOrigin', 'firePatterns', 'ignitionSources',
+  'people', 'investigationItems', 'rooms', 'areaOrigin', 'firePatterns', 'ignitionSources',
   'ignitionMatrix', 'photos', 'evidence', 'interviews', 'reports', 'files'
 ];
 const requiredMobileAdditions = ['deck', 'smokeAlarms', 'timeline', 'tasks'];
@@ -24,6 +24,17 @@ const requiredText = [
   'Upload Photos to LCSO Digital Evidence Platform'
 ];
 const missingRequiredText = requiredText.filter(text => !app.includes(text));
+const investigationItemRequirements = [
+  ['Additional Investigation Items section', 'Additional Investigation Items'],
+  ['+ Add Item flow', 'data-action="addInvestigationItem"'],
+  ['Vehicle item type', 'Vehicle'],
+  ['Machinery / Equipment item type', 'Machinery / Equipment'],
+  ['Exposure Structure item type', 'Exposure Structure'],
+  ['Appliance item type', 'Appliance'],
+  ['Appliance renderer', 'function applianceFields'],
+  ['Check Recalls placeholder action', "a==='checkRecalls'"]
+];
+const missingInvestigationItems = investigationItemRequirements.filter(([, text]) => !app.includes(text)).map(([label]) => label);
 const forbiddenLiteral = 'juris' + 'diction';
 const forbidden = [];
 if(app.toLowerCase().includes(forbiddenLiteral)) forbidden.push('removed field still present in app.js');
@@ -38,6 +49,7 @@ const failures = [
   ['render map entries', missingRenderMap],
   ['screen functions', missingFunctions],
   ['field-use requirements', missingRequiredText],
+  ['investigation item framework requirements', missingInvestigationItems],
   ['forbidden regressions', forbidden]
 ].filter(([, missing]) => missing.length);
 
@@ -46,4 +58,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Preservation check passed for ${acceptedScreens.length} accepted screens, ${requiredMobileAdditions.length} mobile additions, and field-use fixes.`);
+console.log(`Preservation check passed for ${acceptedScreens.length} accepted screens, ${requiredMobileAdditions.length} mobile additions, field-use fixes, and approved Investigation Items framework checks.`);
