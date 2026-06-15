@@ -162,7 +162,6 @@ A case becomes active only when the user:
 - Case Number
 - Incident Type
 - Incident Address
-- Jurisdiction
 - Primary Investigator
 - Assisted By
 - Case Status
@@ -315,7 +314,7 @@ Document physical evidence collected during the investigation.
 - Date/Time Collected
 - Date/Time Delivered to LCSO
 - LCSO Station
-- Property Locker Number or Property Counter
+- Evidence Secured disposition, Date/Time Secured, and Locker Number / Storage Location when applicable
 - Narrative Notes
 
 ## Requirements
