@@ -483,9 +483,23 @@ const templates={people:personTemplate,investigationItems:investigationItemTempl
 function downloadBlob(name,blob){ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000); }
 function exportText(name,text){ downloadBlob(name, new Blob([text],{type:'text/plain;charset=utf-8'})); }
 function pdfEscape(text){ return String(text||'').replace(/[\\()]/g, '\\$&'); }
-function pdfTextCommands(lines){ return lines.map((line,i)=>`BT /F1 10 Tf 42 ${760-(i*14)} Td (${pdfEscape(line).slice(0,110)}) Tj ET`).join('\n'); }
+function wrapPdfLine(line, max=95){
+  const text = String(line ?? '');
+  if(text === '') return [''];
+  const out = [];
+  let remaining = text;
+  while(remaining.length > max){
+    let cut = remaining.lastIndexOf(' ', max);
+    if(cut < Math.floor(max * 0.6)) cut = max;
+    out.push(remaining.slice(0, cut));
+    remaining = remaining.slice(cut).replace(/^ /, '');
+  }
+  out.push(remaining);
+  return out;
+}
+function pdfTextCommands(lines){ return lines.map((line,i)=>`BT /F1 10 Tf 42 ${760-(i*14)} Td (${pdfEscape(line)}) Tj ET`).join('\n'); }
 function createPdfBlob(title,text){
-  const raw=[title, '', ...String(text||'').split(/\r?\n/)];
+  const raw=[title, '', ...String(text||'').split(/\r?\n/)].flatMap(line=>wrapPdfLine(line));
   const pages=[];
   for(let i=0;i<raw.length;i+=52) pages.push(raw.slice(i,i+52));
   const objects=[];
@@ -511,8 +525,39 @@ async function exportCaseBundle(){ try{ save(); const base=filename().replace('.
 function filename(){ const c=(state.initial.caseNumber||'FIP_Case').replace(/[^a-z0-9_-]/gi,'_'); return `${c}.fip`; }
 async function exportFip(share){ save(); const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json;charset=utf-8'}); const file=new File([blob], filename(), {type:'application/json'}); if(share && navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'FIP Case File'}); return; } downloadBlob(filename(), blob); }
 $('#importFile').addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f) return; try{ const txt=await f.text(); state=migrate(JSON.parse(txt)); activateCase(); save(); render('dashboard'); }catch(err){ alert('Could not import that .fip file.'); } e.target.value=''; });
-function line(label,value){ return value ? `${label}: ${value}` : ''; }
-function section(title,lines=[]){ const body=lines.flat().filter(Boolean); return body.length ? [``, `## ${title}`, ...body] : []; }
+function labelFromKey(key){ return String(key||'').replace(/([a-z0-9])([A-Z])/g,'$1 $2').replace(/[_-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+function hasNotebookValue(value){ return value !== undefined && value !== null && !(Array.isArray(value) && value.length === 0); }
+function notebookValue(value){ return Array.isArray(value) ? value.join(', ') : String(value ?? ''); }
+function line(label,value){ return hasNotebookValue(value) && notebookValue(value) !== '' ? `${label}: ${notebookValue(value)}` : ''; }
+function section(title,lines=[]){ const body=lines.flat().filter(v=>v !== undefined && v !== null); return [``, `## ${title}`, ...body]; }
+function notebookField(label,value){
+  if(Array.isArray(value)) return `${label}: ${value.join(', ')}`;
+  if(value && typeof value === 'object') return [`${label}:`, ...notebookObject(value, 1)].join('\n');
+  const text = String(value ?? '');
+  return text.includes('\n') ? `${label}:\n${text}` : `${label}: ${text}`;
+}
+function notebookObject(obj, depth=0, skip=[]){
+  const skipSet = new Set(skip);
+  return Object.entries(obj || {}).filter(([key])=>!skipSet.has(key)).map(([key,value])=>{
+    const label = labelFromKey(key);
+    if(Array.isArray(value)) return notebookArray(label, value, depth);
+    if(value && typeof value === 'object') return [`${label}:`, ...notebookObject(value, depth + 1)].join('\n');
+    return notebookField(label, value);
+  });
+}
+function notebookArray(label, arr, depth=0){
+  const items = Array.isArray(arr) ? arr : [];
+  if(!items.length) return `${label}:`;
+  return [`${label}:`, ...items.flatMap((item,index)=>{
+    const heading = `### ${label} ${index + 1}`;
+    if(item && typeof item === 'object') return [heading, ...notebookObject(item, depth + 1)];
+    return [heading, String(item ?? '')];
+  })].join('\n');
+}
+function notebookItem(title, item){ return [`### ${title}`, ...notebookObject(item || {})]; }
+function linkedPersonName(personId){ return (state.people||[]).find(p=>p.id===personId)?.name || ''; }
+function interviewNotebookItem(x,i){ const linked=linkedPersonName(x.personId); return [`### Interview ${i+1}${linked ? ` - ${linked}` : x.person ? ` - ${x.person}` : ''}`, ...(linked ? [notebookField('Linked Person Name', linked)] : []), ...notebookObject(x || {})]; }
+function timelineSortKey(t){ return `${t?.date || ''}T${t?.time || ''}`; }
 function joinFields(obj, pairs){ return pairs.map(([label,key])=>line(label,obj?.[key])).filter(Boolean); }
 function evidenceDispositionLines(){ return (state.evidence||[]).map(e=>`Evidence ${e.number || ''}: ${[e.description, e.location, e.evidenceSecured, [e.dateSecured,e.timeSecured].filter(Boolean).join(' '), e.lockerStorageLocation, e.notes].filter(Boolean).join(' • ')}`).filter(l=>!l.endsWith(': ')); }
 function applianceLine(item){ return `Appliance: ${[item.applianceType, item.manufacturer, item.modelNumber && `Model ${item.modelNumber}`, item.serialNumber && `Serial ${item.serialNumber}`, item.dateCode && `Date Code ${item.dateCode}`, item.powerSource, item.location, item.pluggedIn && `Plugged In ${item.pluggedIn}`, item.energized && `Energized ${item.energized}`, item.operatingAtTimeOfFire && `Operating ${item.operatingAtTimeOfFire}`, item.lastKnownUse && `Last Use ${item.lastKnownUse}`, item.conditionObserved, item.fireDamageObserved && `Fire Damage: ${item.fireDamageObserved}`, item.electricalDamageObserved && `Electrical Damage: ${item.electricalDamageObserved}`, item.recallCheckNeeded && `Recall Check Needed ${item.recallCheckNeeded}`, item.recallChecked && `Recall Checked ${item.recallChecked}`, item.recallSource && `Recall Source ${item.recallSource}`, item.recallResults && `Recall Results ${item.recallResults}`, item.notes].filter(Boolean).join(' • ')}`; }
@@ -520,7 +565,30 @@ function investigationItemLines(){ return (state.investigationItems||[]).map(ite
 function interviewLines(){ return (state.interviews||[]).map(x=>{ const linked=(state.people||[]).find(p=>p.id===x.personId); return `${x.interviewType || x.guide || 'Interview'}: ${[linked?.name || x.person, x.date, x.time, x.location, x.summary, x.notes, x.followUp].filter(Boolean).join(' • ')}`; }).filter(l=>!l.endsWith(': ')); }
 function taskListLines(){ return [...Object.values(state.tasks||{}), ...(state.customTasks||[])].map(t=>`${t.label || 'Task'}: ${[t.status || 'Open', t.due && `Due ${t.due}`, t.notes].filter(Boolean).join(' • ')}`); }
 function taskListText(){ return ['Task List', ...taskListLines()].join('\n'); }
-function crispNotesText(){ const i=state.initial; return ['Crisp Investigator Notes', 'Field notebook only - not a final investigative report. No software-generated origin, cause, responsibility, intent, or legal conclusions.', ...section('Case Summary',[line('Case Number', i.caseNumber), line('Incident Type', i.incidentType), line('Address', i.incidentAddress), line('Investigator', state.settings.investigator), line('Status', state.report.status)]), ...section('Initial Information',[line('Notified', [i.dateNotified,i.timeNotified].filter(Boolean).join(' ')), line('Reported', [i.reportedDate,i.reportedTime].filter(Boolean).join(' ')), line('Dispatch', [i.dispatchDate,i.dispatchTime].filter(Boolean).join(' ')), line('Arrival', [i.arrivalDate,i.arrivalTime].filter(Boolean).join(' ')), line('Scene Released', [i.sceneReleasedDate,i.sceneReleasedTime].filter(Boolean).join(' ')), line('Initial Notes', i.notes), line('Caller Observed', state.caller.whatObserved), line('Fire Department Notes', state.fireDept.fdNotes)]), ...section('Building / Utilities Summary', joinFields(state.building,[['Property Description','propertyDescription'],['Construction Type','constructionType'],['Roof Covering','roofCovering'],['Alarm Notes','alarmNotes']]).concat(joinFields(state.utilities,[['Electricity','electricOn'],['Electric Provider','electricProvider'],['Electric Meter Location','electricMeterLocation'],['Natural Gas Present','gasOn'],['Gas Meter Location','gasMeterLocation'],['LP Present','lpTank'],['Generator Present','generatorPresent'],['Utility Notes','notes']]))), ...section('Investigation Items', investigationItemLines()), ...section('Appliance Items', (state.investigationItems||[]).filter(x=>x.itemType==='Appliance').map(applianceLine)), ...section('Evidence', evidenceDispositionLines()), ...section('Interviews', interviewLines()), ...section('Area of Origin Documentation', (state.originAreas||[]).map(o=>[o.name,o.room,o.level,o.status,o.basis,o.supportingPatterns,o.contradictoryIndicators,o.notes].filter(Boolean).join(' • ')).concat(state.report.areaOfOrigin ? [`Final Area of Origin field: ${state.report.areaOfOrigin}`] : [])), ...section('Potential Ignition Sources', (state.ignitionSources||[]).map(x=>[x.category,x.specificSource,x.location,x.withinOriginArea,x.observations,x.whyConsidered,x.notes].filter(Boolean).join(' • '))), ...section('Ignition Matrix', (state.ignitionMatrix||[]).map(x=>[x.source,x.location,x.hypothesis,x.evidenceFor,x.evidenceAgainst,x.testingPerformed,x.status,x.basis].filter(Boolean).join(' • '))), ...section('Task List', taskListLines()), '', 'Blank Field Notes:', '', '____________________________________________________________', '', '____________________________________________________________', '', '____________________________________________________________'].filter(Boolean).join('\n'); }
+function crispNotesText(){
+  const timelineEntries = [...(state.timeline||[])].sort((a,b)=>timelineSortKey(a).localeCompare(timelineSortKey(b)));
+  return [
+    'Crisp Investigator Notes',
+    'Complete digital field notebook. Investigator-entered content is exported without AI interpretation, conclusions, rewriting, paraphrasing, or summarization.',
+    ...section('Initial Information', [...notebookObject(state.case || {}), ...notebookObject(state.initial || {}), ...notebookObject(state.caller || {}).map(x=>`Caller - ${x}`), ...notebookObject(state.fireDept || {}).map(x=>`Fire Department - ${x}`), ...notebookObject(state.environment || {}).map(x=>`Environment - ${x}`), ...notebookObject(state.scene || {}).map(x=>`Scene - ${x}`)]),
+    ...section('Building Information', [...notebookObject(state.building || {}), ...(state.deck ? ['### Deck', ...notebookObject(state.deck)] : [])]),
+    ...section('Utilities', [...notebookObject(state.utilities || {}), ...(state.electrical ? ['### Electrical', ...notebookObject(state.electrical)] : [])]),
+    ...section('Safety Assessment', [...notebookObject(state.lifeSafety || {}), ...((state.smokeAlarms||[]).flatMap((x,i)=>notebookItem(`Smoke Alarm ${i+1}`, x)))]),
+    ...section('Exterior Documentation', [...notebookObject(state.exterior || {}), ...((state.exposureStructures||[]).flatMap((x,i)=>notebookItem(`Exposure Structure ${i+1}`, x))), ...((state.photos||[]).flatMap((x,i)=>notebookItem(`Photo ${i+1}`, x)))]),
+    ...section('Interior Documentation', [...notebookObject(state.interior || {}), ...((state.rooms||[]).flatMap((x,i)=>notebookItem(`Room ${i+1}`, x))), ...((state.windows||[]).flatMap((x,i)=>notebookItem(`Window ${i+1}`, x))), ...((state.vehicles||[]).flatMap((x,i)=>notebookItem(`Vehicle ${i+1}`, x))), ...((state.machinery||[]).flatMap((x,i)=>notebookItem(`Machinery / Equipment ${i+1}`, x)))]),
+    ...section('Evidence', (state.evidence||[]).flatMap((x,i)=>notebookItem(`Evidence ${i+1}`, x))),
+    ...section('People', (state.people||[]).flatMap((x,i)=>notebookItem(`Person ${i+1}`, x))),
+    ...section('Interviews', (state.interviews||[]).flatMap(interviewNotebookItem)),
+    ...section('Surveillance Camera Canvass', [notebookField('Security Cameras', state.lifeSafety?.securityCameras), notebookField('Security / Camera Notes', state.lifeSafety?.notes)]),
+    ...section('Area(s) of Origin', [...((state.originAreas||[]).flatMap((x,i)=>notebookItem(`Area of Origin ${i+1}`, x))), notebookField('Report Area Of Origin Field', state.report?.areaOfOrigin)]),
+    ...section('Potential Ignition Sources', (state.ignitionSources||[]).flatMap((x,i)=>notebookItem(`Potential Ignition Source ${i+1}`, x))),
+    ...section('Ignition Source Assessment Matrix', (state.ignitionMatrix||[]).flatMap((x,i)=>notebookItem(`Ignition Source Assessment ${i+1}`, x))),
+    ...section('Additional Investigation Items', (state.investigationItems||[]).flatMap((x,i)=>notebookItem(`${x.itemType || 'Investigation Item'} ${i+1}`, x))),
+    ...section('Timeline', timelineEntries.flatMap((x,i)=>notebookItem(`Timeline Entry ${i+1}`, x))),
+    ...section('Investigator Notes', [...((state.notes||[]).flatMap((x,i)=>notebookItem(`Investigator Note ${i+1}`, x))), notebookField('Report Narrative', state.report?.narrative), notebookField('Report Electrical Notes', state.report?.electricalNotes)]),
+    ...section('Reports / Exports', [...notebookObject(state.report || {}), '### Tasks', ...taskListLines(), '### Settings', ...notebookObject(state.settings || {}), '### Metadata', ...notebookObject(state.meta || {})])
+  ].join('\n');
+}
 function initialReportText(){ const i=state.initial; return ['Initial Report', ...section('Case Summary',[line('Case Number', i.caseNumber), line('Incident Type', i.incidentType), line('Address', i.incidentAddress), line('Investigator', state.settings.investigator), line('Assisted By', state.case.assistedBy)]), ...section('Initial Dispatch / Arrival Information',[line('Notified', [i.dateNotified,i.timeNotified].filter(Boolean).join(' ')), line('Reported', [i.reportedDate,i.reportedTime].filter(Boolean).join(' ')), line('Dispatch', [i.dispatchDate,i.dispatchTime].filter(Boolean).join(' ')), line('Arrival', [i.arrivalDate,i.arrivalTime].filter(Boolean).join(' ')), line('Scene Released', [i.sceneReleasedDate,i.sceneReleasedTime].filter(Boolean).join(' '))]), ...section('Basic Incident Description',[line('Initial Notes', i.notes), line('Caller Observed', state.caller.whatObserved), line('FD Activity', state.fireDept.engineActivity || state.fireDept.truckActivity)]), ...section('Investigation Items Summary', investigationItemLines()), ...section('Evidence Summary', evidenceDispositionLines()), ...section('Interview Summary', interviewLines()), ...section('Area of Origin / Ignition Fields Entered by Investigator',[line('Area of Origin', state.report.areaOfOrigin), line('Ignition Source', state.report.ignitionSource), line('First Fuel', state.report.firstFuel), line('Oxidizing Agent', state.report.oxidizingAgent), line('Narrative Notes', state.report.narrative)])].filter(Boolean).join('\n'); }
 function reportText(){ const i=state.initial,b=state.building,r=state.report; const total=(Number(r.structureLoss||0)+Number(r.contentsLoss||0))||''; const evidenceLines=evidenceDispositionLines(); return `Case#: ${i.caseNumber || '[CASE NUMBER]'} - Summary Investigative Report\nType: ${i.incidentType || '[TYPE]'} - ${i.incidentAddress || '[ADDRESS]'}\nReported: ${i.reportedDate || i.dateNotified || '[DATE]'} ${i.reportedTime || i.timeNotified || '[TIME]'}\nInvestigator: ${state.settings.investigator || '[INVESTIGATOR]'}\n\nNARRATIVE:\nOn ${i.dateNotified || '[DATE]'}, at ${i.timeNotified || '[TIME]'}, I was dispatched to the above-listed address to conduct a fire origin and cause investigation.\n\nThe property was documented as ${b.propertyDescription || '[PROPERTY DESCRIPTION]'} with ${b.constructionType || '[CONSTRUCTION TYPE]'} construction. The investigator documented the area of origin as ${r.areaOfOrigin || '[AREA OF ORIGIN]'}.\n\nThe investigator classified the cause as ${r.causeClassification || i.cause || '[CAUSE CLASSIFICATION]'}. The investigator documented the ignition source as ${r.ignitionSource || '[IGNITION SOURCE]'}, which ignited ${r.firstFuel || '[FIRST FUEL]'}, utilizing ${r.oxidizingAgent || 'normal atmospheric oxygen'} as the oxidizing agent.\n\nThe estimated dollar loss for this incident was $${r.structureLoss || '0'} in structure damage and $${r.contentsLoss || '0'} in contents, totaling $${total || '0'}.\n\n${evidenceLines.length ? `EVIDENCE SECURED:\n${evidenceLines.join('\n')}\n\n` : ''}${r.narrative || ''}\n\nSTATUS: ${r.status || 'Open'}`; }
 render('dashboard'); save();
